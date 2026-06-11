@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Liquid Link · 动态聚合页</title>
+    <style>
+        /* ========== DESIGN SYSTEM TOKENS (iOS Minimalist Liquid Glass) ========== */
+        :root {
+            --bg-primary: #F2F2F7;
+            --bg-surface: #FFFFFF;
+            --bg-elevated: rgba(255, 255, 255, 0.85);
+            --accent: #000000;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --text-tertiary: #C7C7CC;
+            --border: #E5E5EA;
+            --danger: #FF3B30;
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 9999px;
+
+            --shadow-resting: 0 2px 12px rgba(0, 0, 0, 0.04);
+            --shadow-lifted: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-floating: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-2xl: 24px;
+            --space-3xl: 32px;
+            --space-safe: 34px;
+
+            --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+            --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #000000;
+                --bg-surface: #1C1C1E;
+                --bg-elevated: rgba(28, 28, 30, 0.85);
+                --accent: #FFFFFF;
+                --text-primary: #FFFFFF;
+                --text-secondary: #8E8E93;
+                --text-tertiary: #545458;
+                --border: #38383A;
+                --shadow-resting: 0 2px 12px rgba(0, 0, 0, 0.3);
+                --shadow-lifted: 0 4px 20px rgba(0, 0, 0, 0.5);
+                --shadow-floating: 0 8px 32px rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-lg) 0;
+        }
+
+        /* 头像区域 */
+        .avatar {
+            width: 96px;
+            height: 96px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-full);
+            margin: 0 auto var(--space-lg);
+            box-shadow: var(--shadow-resting);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            transition: transform 0.2s var(--ease-spring);
+        }
+        .avatar:active {
+            transform: scale(0.96);
+        }
+
+        .name {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.3px;
+            margin-bottom: var(--space-xs);
+        }
+
+        .bio {
+            font-size: 16px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: var(--space-3xl);
+        }
+
+        /* 链接按钮组 */
+        .links-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin-bottom: var(--space-3xl);
+        }
+
+        .link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            height: 52px;
+            padding: 0 var(--space-xl);
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 17px;
+            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s var(--ease-spring);
+            cursor: pointer;
+            box-shadow: var(--shadow-resting);
+        }
+
+        .link-btn:active {
+            transform: scale(0.96);
+            box-shadow: var(--shadow-lifted);
+        }
+
+        .arrow {
+            font-size: 20px;
+            color: var(--text-secondary);
+            transition: transform 0.2s var(--ease-spring);
+        }
+        .link-btn:active .arrow {
+            transform: translateX(4px);
+        }
+
+        /* 底部导航 (液态玻璃 + 彩虹光晕) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+            padding: 0 var(--space-lg);
+        }
+
+        .nav-glass {
+            background: var(--bg-elevated);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-floating);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 24px;
+            position: relative;
+            border: 0.5px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-glass::before {
+            content: '';
+            position: absolute;
+            inset: -1.5px;
+            background: conic-gradient(from 0deg, #ff7e5e, #feb47b, #6a11cb, #2575fc, #ff7e5e);
+            border-radius: var(--radius-full);
+            z-index: -2;
+            animation: rotateGlow 8s linear infinite;
+            filter: blur(3px);
+            opacity: 0.5;
+        }
+        .nav-glass::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-elevated);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-full);
+            z-index: -1;
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            padding: 6px 0;
+            cursor: default;
+            min-width: 56px;
+        }
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            margin-bottom: 4px;
+            stroke: var(--accent);
+        }
+        .nav-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* 入场动画 */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .avatar, .name, .bio, .link-btn {
+            animation: fadeSlideUp 0.4s var(--ease-spring) forwards;
+            opacity: 0;
+        }
+        .avatar { animation-delay: 0.05s; }
+        .name { animation-delay: 0.1s; }
+        .bio { animation-delay: 0.15s; }
+        .link-btn { animation-delay: 0.2s; }
+        .link-btn:nth-child(1) { animation-delay: 0.2s; }
+        .link-btn:nth-child(2) { animation-delay: 0.25s; }
+        .link-btn:nth-child(3) { animation-delay: 0.3s; }
+        .link-btn:nth-child(4) { animation-delay: 0.35s; }
+        .link-btn:nth-child(5) { animation-delay: 0.4s; }
+
+        .loading, .error {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="avatar">🔗</div>
+    <div class="name">我的链接集</div>
+    <div class="bio" id="bio-status">加载中...</div>
+    <div id="links-container" class="links-group">
+        <div class="loading">✨ 加载链接中...</div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-glass">
+        <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path d="M10 13C11.5 14.5 13 15 14 15C15 15 17 14.5 18 13C20 11 20 8 18 6C16 4 13 4 11 6L9 8" />
+                <path d="M14 11C12.5 9.5 11 9 10 9C9 9 7 9.5 6 11C4 13 4 16 6 18C8 20 11 20 13 18L15 16" />
+            </svg>
+            <span class="nav-label">动态聚合</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadLinks() {
+        const container = document.getElementById('links-container');
+        const bioEl = document.getElementById('bio-status');
+        try {
+            // 加时间戳防止缓存，确保后台更新后立刻看到
+            const response = await fetch('links.json?t=' + Date.now());
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            const links = data.links || [];
+            
+            if (!links.length) {
+                container.innerHTML = '<div class="loading">暂无链接，请登录后台添加</div>';
+                bioEl.innerText = '暂无链接';
+                return;
+            }
+            
+            // 生成链接按钮
+            container.innerHTML = links.map(link => `
+                <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span class="btn-label">${escapeHtml(link.name)}</span>
+                    <span class="arrow">↗</span>
+                </a>
+            `).join('');
+            bioEl.innerText = `${links.length} 个链接 · 随时后台更新`;
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<div class="error">⚠️ 加载失败，请检查网络或稍后刷新</div>';
+            bioEl.innerText = '加载失败';
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    loadLinks();
+</script>
+</body>
+</html>
