@@ -1,0 +1,24 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+  - name: "links"
+    label: "链接管理"
+    folder: "/"
+    create: false
+    slug: "links"
+    fields:
+      - label: "链接列表"
+        name: "links"
+        widget: "list"
+        summary: "{{fields.name}}"
+        field:
+          name: "link_item"
+          widget: "object"
+          fields:
+            - { label: "名称", name: "name", widget: "string" }
+            - { label: "网址", name: "url", widget: "string" }
